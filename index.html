@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Free WiFi — Guest Access</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c8a96e;
+      --gold-light: #e8c98e;
+      --dark: #0c0c12;
+      --surface: #13131d;
+      --surface2: #1a1a28;
+      --border: rgba(200, 169, 110, 0.18);
+      --text: #e8e4dc;
+      --text-dim: rgba(232, 228, 220, 0.5);
+      --radius: 12px;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Georgia', 'Times New Roman', serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 60px;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200,169,110,0.12) 0%, transparent 70%),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 59px,
+          rgba(255,255,255,0.015) 60px
+        );
+    }
+
+    /* ── HEADER ── */
+    .venue-header {
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      padding: 36px 0 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .venue-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .venue-name {
+      font-size: clamp(22px, 5vw, 30px);
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: var(--gold-light);
+      text-transform: uppercase;
+    }
+
+    .venue-tagline {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      letter-spacing: 0.08em;
+      font-family: -apple-system, sans-serif;
+    }
+
+    /* ── AD BANNER ── */
+    .ad-card {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ad-inner {
+      padding: 28px 24px 24px;
+      text-align: center;
+    }
+
+    .ad-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: -apple-system, sans-serif;
+    }
+
+    .ad-headline {
+      font-size: clamp(20px, 4.5vw, 26px);
+      color: var(--gold-light);
+      margin: 10px 0 8px;
+      line-height: 1.3;
+    }
+
+    .ad-body {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .ad-bar {
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .ad-timer {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .ad-timer span {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .skip-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+      display: none;
+    }
+
+    .skip-btn.visible { display: block; }
+    .skip-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    .progress-bar {
+      height: 2px;
+      background: var(--surface2);
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      width: 100%;
+      transition: width 1s linear;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+    }
+
+    .form-title {
+      font-size: 18px;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .form-subtitle {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+      font-family: -apple-system, sans-serif;
+      line-height: 1.5;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 7px;
+      font-family: -apple-system, sans-serif;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 15px;
+      padding: 13px 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: -apple-system, sans-serif;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input:focus { border-color: var(--gold); }
+    input::placeholder { color: rgba(232,228,220,0.3); }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6) sepia(1) saturate(3) hue-rotate(5deg); }
+
+    /* Consent */
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .consent-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      margin-top: 2px;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .consent-text {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .consent-text a {
+      color: var(--gold);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(200,169,110,0.3);
+    }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      border: none;
+      border-radius: 8px;
+      color: #0c0c12;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .submit-btn:hover { opacity: 0.92; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Status */
+    .status-msg {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-top: 14px;
+      min-height: 20px;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .status-msg.success { color: #7ecba1; }
+    .status-msg.error { color: #e07575; }
+
+    /* ── MODALS ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      width: 100%;
+      max-width: 500px;
+      max-height: 80vh;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      color: var(--gold-light);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .modal-body h3 {
+      font-size: 14px;
+      color: var(--text);
+      margin: 16px 0 6px;
+      font-family: Georgia, serif;
+    }
+
+    /* Success Screen */
+    #success-screen {
+      display: none;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      padding: 60px 24px;
+    }
+
+    .success-icon {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #3a9e6d, #5bc48d);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+    }
+
+    .success-title {
+      font-size: 26px;
+      color: var(--gold-light);
+      margin-bottom: 10px;
+    }
+
+    .success-body {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .powered {
+      text-align: center;
+      font-size: 10px;
+      color: rgba(200,169,110,0.25);
+      letter-spacing: 0.15em;
+      margin-top: 32px;
+      text-transform: uppercase;
+      font-family: -apple-system, sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="venue-header">
+    <div class="venue-icon">🏨</div>
+    <div class="venue-name" id="venue-name">Welcome</div>
+    <div class="venue-tagline" id="venue-tagline">Complimentary WiFi Access</div>
+  </header>
+
+  <!-- SUCCESS SCREEN (hidden initially) -->
+  <div id="success-screen">
+    <div class="success-icon">✓</div>
+    <div class="success-title">You're Connected!</div>
+    <div class="success-body">
+      Enjoy your complimentary WiFi.<br>
+      Connecting you now…
+    </div>
+  </div>
+
+  <!-- AD CARD -->
+  <div class="ad-card" id="ad-card">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="ad-inner">
+      <div class="ad-label">Today's Offer</div>
+      <div class="ad-headline" id="ad-headline">Enjoy 15% Off Your Next Stay</div>
+      <div class="ad-body" id="ad-body">
+        Show this screen at reception to claim your exclusive returning guest discount.
+        Valid this week only.
+      </div>
+    </div>
+    <div class="ad-bar">
+      <div class="ad-timer">Please wait <span id="countdown">15</span>s</div>
+      <button class="skip-btn" id="skip-btn" onclick="skipAd()">Skip ›</button>
+    </div>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="form-card" id="form-card" style="display:none;">
+    <div class="form-title">Quick Registration</div>
+    <div class="form-subtitle">Complete the form below to unlock your free WiFi.</div>
+
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="fname" placeholder="Your full name" autocomplete="name" />
+    </div>
+
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="femail" placeholder="you@example.com" autocomplete="email" />
+    </div>
+
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" id="fphone" placeholder="+371 00 000 000" autocomplete="tel" />
+    </div>
+
+    <div class="field">
+      <label>Check-out Date</label>
+      <input type="date" id="fcheckout" />
+    </div>
+
+    <div class="consent-row">
+      <input type="checkbox" id="fconsent" />
+      <div class="consent-text">
+        I agree to the <a href="#" onclick="openModal('terms'); return false;">Terms & Conditions</a>
+        and <a href="#" onclick="openModal('privacy'); return false;">Privacy Policy</a>.
+        I consent to receiving occasional offers and updates.
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+      Connect to WiFi
+    </button>
+    <div class="status-msg" id="status-msg"></div>
+  </div>
+
+  <div class="powered">Powered by VeranoWifi</div>
+
+  <!-- TERMS MODAL -->
+  <div class="modal-overlay" id="modal-terms">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Terms & Conditions</div>
+        <button class="modal-close" onclick="closeModal('terms')">×</button>
+      </div>
+      <div class="modal-body">
+        <h3>1. Acceptance of Terms</h3>
+        <p>By connecting to our WiFi network you agree to these terms. The service is provided free of charge and for lawful purposes only.</p>
+        <h3>2. Acceptable Use</h3>
+        <p>You agree not to use the WiFi connection for any illegal activities, including but not limited to copyright infringement, hacking, or distribution of malicious software.</p>
+        <h3>3. Bandwidth</h3>
+        <p>Fair use limits apply. We reserve the right to throttle or disconnect sessions that consume excessive bandwidth.</p>
+        <h3>4. Limitation of Liability</h3>
+        <p>We are not responsible for data loss, security breaches, or damages arising from your use of this network. Use a VPN for sensitive activities.</p>
+        <h3>5. Session Duration</h3>
+        <p>Sessions may expire after a period of inactivity. Simply reconnect to continue.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIVACY MODAL -->
+  <div class="modal-overlay" id="modal-privacy">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Privacy Policy</div>
+        <button class="modal-close" onclick="closeModal('privacy')">×</button>
+      </div>
+      <div class="modal-body">
+        <h3>Data We Collect</h3>
+        <p>We collect your name, email address, phone number, and check-out date for the purpose of providing WiFi access and sending relevant venue information.</p>
+        <h3>How We Use Your Data</h3>
+        <p>Your data is used to manage your WiFi session and may be used to send you special offers from this venue. We do not sell your data to third parties.</p>
+        <h3>Data Retention</h3>
+        <p>Data is retained for up to 24 months and can be deleted upon request. Contact the venue directly to exercise your rights under GDPR.</p>
+        <h3>Your Rights (GDPR)</h3>
+        <p>You have the right to access, correct, or delete your personal data. You may withdraw consent to marketing at any time by contacting us.</p>
+        <h3>Contact</h3>
+        <p>For data-related enquiries please speak to the venue reception or ask for the manager.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────
+    // CONFIGURATION — update these for each venue
+    // ─────────────────────────────────────────────
+    const CONFIG = {
+      venueName:   'Hotel Verano',
+      tagline:     'Complimentary Guest WiFi',
+      adHeadline:  'Enjoy 15% Off Your Next Stay',
+      adBody:      'Show this screen at reception to claim your exclusive returning guest discount. Valid this week only.',
+      adDuration:  15,           // seconds before skip activates
+      skipAfter:   5,            // seconds before skip BUTTON shows
+      appsScriptUrl: 'YOUR_APPS_SCRIPT_URL_HERE',
+      authHost:    'http://192.168.8.1:2050',
+    };
+
+    // Apply config
+    document.getElementById('venue-name').textContent  = CONFIG.venueName;
+    document.getElementById('venue-tagline').textContent = CONFIG.tagline;
+    document.getElementById('ad-headline').textContent = CONFIG.adHeadline;
+    document.getElementById('ad-body').textContent     = CONFIG.adBody;
+
+    // Set min date for checkout picker
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    document.getElementById('fcheckout').min = tomorrow.toISOString().split('T')[0];
+    document.getElementById('fcheckout').value = tomorrow.toISOString().split('T')[0];
+
+    // Get token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tok = urlParams.get('tok') || '';
+
+    // ─── AD COUNTDOWN ───
+    let timeLeft = CONFIG.adDuration;
+    const countdownEl  = document.getElementById('countdown');
+    const skipBtn      = document.getElementById('skip-btn');
+    const progressFill = document.getElementById('progress-fill');
+
+    progressFill.style.width = '100%';
+
+    const timer = setInterval(() => {
+      timeLeft--;
+      countdownEl.textContent = timeLeft;
+      progressFill.style.width = (timeLeft / CONFIG.adDuration * 100) + '%';
+
+      if (timeLeft <= CONFIG.adDuration - CONFIG.skipAfter) {
+        skipBtn.classList.add('visible');
+      }
+
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        showForm();
+      }
+    }, 1000);
+
+    function skipAd() {
+      clearInterval(timer);
+      showForm();
+    }
+
+    function showForm() {
+      document.getElementById('ad-card').style.display = 'none';
+      document.getElementById('form-card').style.display = 'block';
+    }
+
+    // ─── FORM SUBMIT ───
+    function submitForm() {
+      const name     = document.getElementById('fname').value.trim();
+      const email    = document.getElementById('femail').value.trim();
+      const phone    = document.getElementById('fphone').value.trim();
+      const checkout = document.getElementById('fcheckout').value;
+      const consent  = document.getElementById('fconsent').checked;
+      const statusEl = document.getElementById('status-msg');
+      const submitEl = document.getElementById('submit-btn');
+
+      // Validate
+      if (!name)    { setStatus('Please enter your name.', 'error'); return; }
+      if (!email || !email.includes('@')) { setStatus('Please enter a valid email.', 'error'); return; }
+      if (!phone)   { setStatus('Please enter your phone number.', 'error'); return; }
+      if (!consent) { setStatus('Please accept the Terms & Conditions.', 'error'); return; }
+
+      submitEl.disabled = true;
+      setStatus('Connecting you…', '');
+
+      // 1. Fire data to Google Sheets (no-cors — fire & forget)
+      try {
+        fetch(CONFIG.appsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name, email, phone, checkout,
+            venue: CONFIG.venueName,
+            timestamp: new Date().toISOString()
+          })
+        });
+      } catch(e) { /* silent — fire and forget */ }
+
+      // 2. Show success screen
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+
+      // 3. Unlock WiFi via nodogsplash (multiple attempts)
+      if (tok) {
+        const authURL = CONFIG.authHost + '/nodogsplash_auth/?tok=' + tok;
+        setTimeout(() => { try { window.location.href = authURL; } catch(e){} }, 400);
+        setTimeout(() => { try { window.location.href = authURL; } catch(e){} }, 1500);
+        setTimeout(() => { try { window.location.href = authURL; } catch(e){} }, 3500);
+      }
+    }
+
+    function setStatus(msg, type) {
+      const el = document.getElementById('status-msg');
+      el.textContent = msg;
+      el.className = 'status-msg ' + type;
+    }
+
+    // ─── MODALS ───
+    function openModal(type) {
+      document.getElementById('modal-' + type).classList.add('open');
+    }
+    function closeModal(type) {
+      document.getElementById('modal-' + type).classList.remove('open');
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) overlay.classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>
